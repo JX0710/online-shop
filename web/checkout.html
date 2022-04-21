@@ -1,0 +1,80 @@
+<%-- 
+    Document   : checkout
+    Created on : Dec 21, 2019, 2:15:27 PM
+    Author     : Ooi Jing Xian
+--%>
+
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+pageEncoding="ISO-8859-1"%>
+<%@page import="java.sql.*,java.util.*"%>
+<head><link rel="stylesheet" type="text/css" href="style/product.css">
+        <title>Maw & Paw</title></head>
+
+
+<body>
+<table>
+<%
+String Userid=(String)session.getAttribute("userid");
+int temp_id=0,productid=0,quantity=0;
+
+            
+String sql="select*from cart where UserID=?";
+
+            Connection con = null;
+            PreparedStatement ps = null;
+            ResultSet rs = null;
+        
+try{
+   Class.forName("com.mysql.jdbc.Driver");
+        try{
+                    con=DriverManager.getConnection("jdbc:mysql://localhost:3306/petdb","root","");
+                    ps=con.prepareStatement(sql);
+                    ps.setString(1,Userid);
+                    rs=ps.executeQuery();
+                    
+                    if(rs.next()){
+                         productid=rs.getInt("ProdcutID");
+                         quantity=rs.getInt("Quantity");
+                          
+                    }
+                    
+                    ps.close();
+                    
+                    sql="insert into orders(UserID,ProductID,Quantity)values(?,?,?)";
+                    ps=con.prepareStatement(sql);
+                    ps.setString(1, Userid);
+                    ps.setInt(2, productid);
+                    ps.setInt(3, quantity);
+                  
+                    int j=ps.executeUpdate();
+                    
+                    ps.close();
+                    
+                    sql="select last_insert_id(OrderID) from orders";
+                    ps=con.prepareStatement(sql);
+                    rs=ps.executeQuery();
+
+                    while(rs. next()){
+                        temp_id=rs.getInt(1);
+                    }
+                    sql="update orders set OrderID=? where UserID=? ";
+                    ps=con.prepareStatement(sql);
+                    ps.setInt(1,temp_id);
+                    ps.setString(2,Userid);
+
+                    int q=ps.executeUpdate();
+                    ps.close();
+                    rs.close();%>
+                    
+                    
+                    <tr><td><%out.println("Successfully checkout!");%></td></tr>
+        <%}catch(SQLException e_sql){
+            e_sql.printStackTrace();
+        
+        }
+
+}catch(ClassNotFoundException e){
+e.printStackTrace();
+}
+%>  
+<table></body>
